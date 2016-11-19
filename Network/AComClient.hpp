@@ -1,0 +1,37 @@
+#pragma once
+
+#include "Client.hpp"
+
+namespace Client
+{
+	class AComClient
+	{
+	public:
+		AComClient(const std::string &ip, const int port, const std::string &protocol = "TCP");
+		~AComClient();
+
+	public:
+		/*
+		*	"sendMessage" send message at server.
+		*
+		*	@param "msg"  -> msg to send at server.
+		*/
+		void				sendMessage(const std::string &msg);
+
+		/*
+		*	 call "runClient" in the main while.
+		*/
+		void			runClient();
+
+	public:
+		/*
+		*	"recvMessage" it's call by the client after recv message.
+		*
+		*	@param "msg"  -> it's a recv message.
+		*/
+		virtual void		recvMessage(const std::string &msg) = 0;
+
+	private:
+		Client				*_client;
+	};
+}
