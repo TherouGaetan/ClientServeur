@@ -3,7 +3,7 @@
 
 namespace Server
 {
-	Server::Server(AComServ *com)
+	Server::Server(AComServ *com, const int port, const std::string &protocol)
 	{
 		Logger::GetInstance().LogLine("=================================================================");
 		Logger::GetInstance().LogLine("||                      Creat babel server                     ||");
@@ -18,7 +18,7 @@ namespace Server
 
 		Logger::GetInstance().LogLine("||                         Init server                         ||");
 
-		_sockServ->SKInit(".", 2500);
+		_sockServ->SKInit(".", port, protocol);
 
 		Logger::GetInstance().LogLine("||                         Bind server                         ||");
 

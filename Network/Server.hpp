@@ -19,7 +19,7 @@ namespace Server
 	class Server
 	{
 	public:
-		Server(AComServ *com);
+		Server(AComServ *com, const int port, const std::string &protocol);
 		~Server();
 
 	public:

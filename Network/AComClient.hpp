@@ -7,6 +7,11 @@ namespace Client
 	class AComClient
 	{
 	public:
+		/*
+		*	@param "ip"			-> ip server to call
+		*	@param "port"		-> port to connect socket
+		*	@param "protocol"	-> protocol transfert set ("TCP" or "UDP")
+		*/
 		AComClient(const std::string &ip, const int port, const std::string &protocol = "TCP");
 		~AComClient();
 

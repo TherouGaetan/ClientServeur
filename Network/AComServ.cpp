@@ -2,17 +2,17 @@
 
 namespace Server
 {
-	AComServ::AComServ()
+	AComServ::AComServ(const int port, const std::string &protocol)
 	{
-		_server = new Server(this);
+		_server = new Server(this, port, protocol);
 	}
 
-	void AComServ::serverWrite(Socket::ISocket *sock, const std::string &write)
+	void AComServ::serverWrite(Socket::ISocket *sock, const std::string &write) const
 	{
 		_server->writeSocket(sock, write);
 	}
 
-	void AComServ::runServer()
+	void AComServ::runServer() const
 	{
 		_server->run();
 	}
