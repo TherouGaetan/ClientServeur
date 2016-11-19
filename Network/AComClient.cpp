@@ -11,11 +11,11 @@ namespace Client
 	{
 	}
 
-	void AComClient::sendMessage(const std::string & msg)
+	void AComClient::sendMessage(const std::string &msg) const
 	{
 		_client->write(msg);
 	}
-	void AComClient::runClient()
+	void AComClient::runClient() const
 	{
 		_client->run();
 	}

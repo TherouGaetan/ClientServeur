@@ -21,12 +21,12 @@ namespace Client
 		*
 		*	@param "msg"  -> msg to send at server.
 		*/
-		void				sendMessage(const std::string &msg);
+		void				sendMessage(const std::string &msg) const;
 
 		/*
 		*	 call "runClient" in the main while.
 		*/
-		void			runClient();
+		void			runClient() const;
 
 	public:
 		/*

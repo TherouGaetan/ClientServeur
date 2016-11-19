@@ -6,15 +6,15 @@ namespace Server
 	Server::Server(AComServ *com, const int port, const std::string &protocol)
 	{
 		Logger::GetInstance().LogLine("=================================================================");
-		Logger::GetInstance().LogLine("||                      Creat babel server                     ||");
+		Logger::GetInstance().LogLine("||                         Creat server                        ||");
 
-		#ifdef __linux__
-			_sockServ = new Socket::UNIXSock();
-			Logger::GetInstance().LogLine("||                         Unix socket                         ||");
-		#else
-			_sockServ = new Socket::WINSock();
-			Logger::GetInstance().LogLine("||                          Win socket                         ||");
-		#endif // _WIN
+	#ifdef __linux__
+		Logger::GetInstance().LogLine("||                         Unix socket                         ||");
+		_sockServ = new Socket::UNIXSock();
+	#else
+		Logger::GetInstance().LogLine("||                          Win socket                         ||");
+		_sockServ = new Socket::WINSock();
+	#endif // _WIN
 
 		Logger::GetInstance().LogLine("||                         Init server                         ||");
 
@@ -28,12 +28,13 @@ namespace Server
 
 		_sockServ->SKListen(5);
 
-		Logger::GetInstance().LogLine("||                 Server babel end of init OK                 ||");
+		Logger::GetInstance().LogLine("||                     Server initialize OK                    ||");
 		Logger::GetInstance().LogLine("=================================================================");
 	}
 
 	Server::~Server()
 	{
+		delete _sockServ;
 	}
 
 	void Server::run()
