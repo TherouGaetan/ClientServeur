@@ -10,41 +10,46 @@
 
 namespace Client
 {
-	class AComClient;
-
-	class Client
+	template <class T>
+	class AClient
 	{
 	public:
 		/*
-		*	@param "com"		->  class communicate with client
 		*	@param "ip"			->  ip for connect client to the server
 		*	@param "port"		->  port to connect at the server
 		*	@param "protocol"	->	by default it's set at "TCP"
 		*/
-		Client(AComClient *com, const std::string &ip, const int port, const std::string &protocol = "TCP");
-		~Client();
+		AClient(const std::string &ip, const int port, const std::string &protocol = "TCP");
+		~AClient();
+
+	public:
+		/*
+		*	"recvMessage" it's call by the client after recv message.
+		*
+		*	@param "msg"  -> it's a recv message.
+		*/
+		virtual void			recvMessage(const std::string &msg) = 0;
 
 	public:
 		/*
 		*	"run" is a main server function,
 		*	call this function in main while.
 		*/
-		void					run();
+		virtual void			run();
 
 		/*
 		*	"write" add message to buff write.
 		*
 		*	@param "buff"    -> message at send.
 		*/
-		void					write(const std::string &buff);
+		virtual void			write(const std::string &buff);
 
 	private:
 		void					checkReadWrite();
 
 	private:
-		AComClient				*_comClient;
-		Socket::ISocket			*_socket;
-		std::list<std::string>	_buff;
+		Socket::ISocket<T>		*_socket;
+		std::list<T>			_buff;
 		fd_set					_fdread;
 		fd_set					_fdwrite;
 	};

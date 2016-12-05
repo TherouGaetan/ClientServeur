@@ -1,19 +1,20 @@
-#include "Server.hpp"
-#include "AComServ.hpp"
+#include "AServer.hpp"
 
 namespace Server
 {
-	Server::Server(AComServ *com, const int port, const std::string &protocol)
+	template <typename T>
+	AServer<T>::AServer(const int port, const std::string &protocol) :
+		_protocol(protocol)
 	{
 		Logger::GetInstance().LogLine("=================================================================");
 		Logger::GetInstance().LogLine("||                         Creat server                        ||");
 
 	#ifdef __linux__
 		Logger::GetInstance().LogLine("||                         Unix socket                         ||");
-		_sockServ = new Socket::UNIXSock();
+		_sockServ = new Socket::UNIXSock<T>();
 	#else
 		Logger::GetInstance().LogLine("||                          Win socket                         ||");
-		_sockServ = new Socket::WINSock();
+		_sockServ = new Socket::WINSock<T>();
 	#endif // _WIN
 
 		Logger::GetInstance().LogLine("||                         Init server                         ||");
@@ -32,12 +33,14 @@ namespace Server
 		Logger::GetInstance().LogLine("=================================================================");
 	}
 
-	Server::~Server()
+	template <typename T>
+	AServer<T>::~AServer()
 	{
 		delete _sockServ;
 	}
 
-	void Server::run()
+	template <typename T>
+	void AServer<T>::run()
 	{
 		initializeFd();
 
@@ -50,13 +53,14 @@ namespace Server
 			/*
 			*	Check all socket connect, if he need read or write
 			*/
-			for (std::list<Socket::ISocket*>::iterator it = _socket.begin(); it != _socket.end(); ++it) {
+			for (std::list<Socket::ISocket<T>*>::iterator it = _socket.begin(); it != _socket.end(); ++it) {
 				checkReadWrite((*it));
 			}
 		}
 	}
 
-	void Server::writeSocket(Socket::ISocket *sock, const std::string &write)
+	template <typename T>
+	void AServer<T>::writeSocket(Socket::ISocket<T> *sock, const std::string &write)
 	{
 		/*
 		*	Initialize socket for write
@@ -66,10 +70,11 @@ namespace Server
 		/*
 		*	Stock with std::pair, the socket and buff to write.
 		*/
-		_buffWrite.push_back(std::pair<Socket::ISocket*, std::string>(sock, write));
+		_buffWrite.push_back(std::pair<Socket::ISocket<T>*, std::string>(sock, write));
 	}
 
-	void Server::initializeFd()
+	template <typename T>
+	void AServer<T>::initializeFd()
 	{
 		/*
 		*	Prepare fd_read and fd_write.
@@ -81,11 +86,12 @@ namespace Server
 		*	Initialize all socket for read and write
 		*/
 		_sockServ->SKFD_SET(&_fdread);
-		for (std::list<Socket::ISocket *>::iterator it = _socket.begin(); it != _socket.end(); ++it)
+		for (std::list<Socket::ISocket<T> *>::iterator it = _socket.begin(); it != _socket.end(); ++it)
 			(*it)->SKFD_SET(&_fdread);
 	}
 
-	void Server::checkReadWrite(Socket::ISocket *sock)
+	template <typename T>
+	void AServer<T>::checkReadWrite(Socket::ISocket<T> *sock)
 	{
 		/*
 		*	Check with FD_ISSET, if sock need read.
@@ -96,9 +102,9 @@ namespace Server
 			*	
 			*	So, if Recv return -1, user disconneted.
 			*/
-			std::string buff;
-			if (_sockServ->SKRecv(buff) != -1) {
-				_comServ->serverRead(sock, buff);
+			std::string buf;
+			if ((buf = _sockServ->SKRecv()) != "") {
+				_comServ->serverRead(sock, buf);
 				Logger::GetInstance().LogLine("\t-\tRecv message to (" + std::to_string(sock->getSock()) + ").");
 			}
 			else {
@@ -112,7 +118,7 @@ namespace Server
 		*	Check if sock need write
 		*/
 		if (sock->SKFD_ISSET(&_fdwrite)) {
-			for (std::list<std::pair<Socket::ISocket*, std::string>>::iterator it = _buffWrite.begin(); it != _buffWrite.end(); ++it) {
+			for (std::list<std::pair<Socket::ISocket<std::string>*, std::string>>::iterator it = _buffWrite.begin(); it != _buffWrite.end(); ++it) {
 				if ((*it).first == sock) {
 					_sockServ->SKSend((*it).first->getSock(), (*it).second);
 					Logger::GetInstance().LogLine("\t-\tSend message to (" + std::to_string((*it).first->getSock()) + ").");
@@ -123,16 +129,17 @@ namespace Server
 		}
 	}
 
-	void Server::recvNewConnection()
+	template <typename T>
+	void AServer<T>::recvNewConnection()
 	{
 		if (FD_ISSET(_sockServ, &_fdread)) {
 			/*
 			*	Create socket for new user/connection
 			*/
 		#ifdef __linux__
-			_comServ->newUser(new Socket::UNIXSock(_sockServ->SKAccept()));
+			_comServ->newUser(new Socket::UNIXSock<std::string>(_sockServ->SKAccept()));
 		#else
-			_comServ->newUser(new Socket::WINSock(_sockServ->SKAccept()));
+			_comServ->newUser(new Socket::WINSock<std::string>(_sockServ->SKAccept()));
 		#endif // __linux__
 			Logger::GetInstance().LogLine("\t-\tNew connection.");
 		}

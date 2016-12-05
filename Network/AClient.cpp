@@ -1,19 +1,19 @@
-#include "Client.hpp"
-#include "AComClient.hpp"
+#include "AClient.hpp"
 
 namespace Client
 {
-	Client::Client(AComClient *com, const std::string &ip, const int port, const std::string &protocol)
+	template <typename T>
+	AClient<T>::AClient(const std::string &ip, const int port, const std::string &protocol)
 	{
 		Logger::GetInstance().LogLine("=================================================================");
 		Logger::GetInstance().LogLine("||                         Creat client                        ||");
 
 	#ifdef __linux__
 		Logger::GetInstance().LogLine("||                         Unix socket                         ||");
-		_socket = new Socket::UNIXSock();
+		_socket = new Socket::UNIXSock<T>();
 	#else
 		Logger::GetInstance().LogLine("||                          Win socket                         ||");
-		_socket = new Socket::WINSock();
+		_socket = new Socket::WINSock<T>();
 	#endif // _WIN
 
 		Logger::GetInstance().LogLine("||                         Init client                         ||");
@@ -29,12 +29,14 @@ namespace Client
 
 	}
 
-	Client::~Client()
+	template <typename T>
+	AClient<T>::~AClient()
 	{
 		delete _socket;
 	}
 
-	void Client::run()
+	template <typename T>
+	void AClient<T>::run()
 	{
 		/*
 		*	initialize socket for read
@@ -49,7 +51,8 @@ namespace Client
 		}
 	}
 
-	void Client::write(const std::string &buff)
+	template <typename T>
+	void AClient<T>::write(const std::string &buff)
 	{
 		/*
 		*	buffer write stock, and write if the socket is disponible.
@@ -57,15 +60,20 @@ namespace Client
 		_buff.push_back(buff);
 	}
 
-	void Client::checkReadWrite()
+	template <typename T>
+	void AClient<T>::checkReadWrite()
 	{
 		/*
 		*	Check if socket recv message
 		*/
 		if (_socket->SKFD_ISSET(&_fdread)) {
-			std::string buff;
-			_socket->SKRecv(buff);
-			_comClient->recvMessage(buff);
+			std::string buf;
+			buf = _socket->SKRecv();
+
+			/*
+			*	Call surcharge methode 
+			*/
+			this->recvMessage(buf);
 		}
 		/*
 		*	Take a first string in buffer for write in socket
